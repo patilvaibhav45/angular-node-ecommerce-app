@@ -2,23 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ProductService } from '../services/product.service';
 import { map } from 'rxjs/operators';
-
-// import Swiper core and required components
 import { CartService } from '../services/cart.service';
-// import Swiper, { A11y, Autoplay, Controller, Navigation, Pagination, Scrollbar, Thumbs, Virtual, Zoom } from 'swiper';
-
-// // install Swiper components
-// Swiper.use([
-//   Navigation,
-//   Pagination,
-//   Scrollbar,
-//   A11y,
-//   Virtual,
-//   Zoom,
-//   Autoplay,
-//   Thumbs,
-//   Controller,
-// ]);
 
 @Component({
   selector: 'app-product',
@@ -47,7 +31,6 @@ export class ProductComponent implements OnInit {
         })
       )
       .subscribe((productId) => {
-        // returns string so convert it to number
         this.id = parseInt(productId);
         this._product.getSingleProduct(productId).subscribe((product) => {
           console.log(product);

@@ -51,7 +51,6 @@ export class ProfileComponent implements OnInit {
     private _router: Router
   ) {}
 
-  // Update user fields with current details
   ngOnInit(): void {
     const { user_id, fname, email } = this._token.getUser();
     this.userId = user_id;
@@ -66,7 +65,6 @@ export class ProfileComponent implements OnInit {
       : false;
   }
 
-  // Submit data to be updated
   onSubmit(): void {
     this.alertVisible = false;
     if (this.user[2].value !== this.user[3].value) {

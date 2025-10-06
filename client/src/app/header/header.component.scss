@@ -10,13 +10,9 @@
     justify-content: center;
     align-items: center;
   }
-  &__left {
-  }
   &__middle {
     flex-grow: 1;
     text-align: center;
-    > h3 {
-    }
   }
   &__right {
     position: relative;
@@ -44,7 +40,6 @@
   }
 }
 
-// Cart Dropdown
 .cart-dropdown {
   max-width: 280px;
   min-width: 280px;
@@ -138,8 +133,6 @@
     }
   }
 }
-
-// Side Menu Styles
 
 .side-menu {
   width: 285px;

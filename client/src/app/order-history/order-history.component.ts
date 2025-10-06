@@ -52,9 +52,6 @@ export class OrderHistoryComponent implements OnInit {
               this.orders.push({ ...product, ...item });
             });
         });
-        // let uniqueProductsArray = Array.from(
-        //   new Set(res.data.map((p) => p.product_id))
-        // );
       },
       (err) => {
         this.error = err.error.message;
