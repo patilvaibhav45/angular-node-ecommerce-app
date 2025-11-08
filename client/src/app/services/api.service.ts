@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 
@@ -7,7 +6,8 @@ import { map } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class ApiService {
-  private baseUrl = environment.apiUrl;
+  // Use a relative API base so the dev proxy (proxy.conf.json) can forward requestss
+  private baseUrl = '/api/v1/';
 
   constructor(private _http: HttpClient) {}
 
