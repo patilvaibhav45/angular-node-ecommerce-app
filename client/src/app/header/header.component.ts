@@ -1,17 +1,19 @@
-import { Component, OnInit } from '@angular/core';
-import { HostListener } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { CartService } from '../services/cart.service';
 import { TokenStorageService } from '../services/token-storage.service';
-import { NzDropdownMenuComponent, NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
-  // standalone: true,
-  imports: [NzDropdownMenuComponent, NzDropDownModule, CommonModule],
+  standalone: true,
+  imports: [CommonModule, RouterModule, NzDropDownModule, NzButtonModule, NzIconModule],
 })
 export class HeaderComponent implements OnInit {
   screenHeight: any;
