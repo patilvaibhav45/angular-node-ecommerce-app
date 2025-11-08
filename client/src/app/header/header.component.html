@@ -153,7 +153,7 @@
         </li>
       </ul>
     </nav>
-    <div class="🍑">
+    <div class="auth-cta">
       <button
         nz-button
         routerLink="/login"
@@ -170,7 +170,7 @@
       >
         Sign up
       </button>
-      <button nz-button (click)="logout() && toggleMenu()" *ngIf="isLoggedIn">
+      <button nz-button (click)="logout(); toggleMenu()" *ngIf="isLoggedIn">
         Sign out
       </button>
     </div>

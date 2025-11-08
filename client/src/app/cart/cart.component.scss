@@ -161,3 +161,49 @@
     }
   }
 }
+
+@media screen and (max-width: 767px) {
+  .cart-container {
+    padding: 12px;
+    &__list {
+      .list-item {
+        flex-direction: column;
+        align-items: flex-start;
+        &__image {
+          width: 100%;
+          min-width: auto;
+          min-height: auto;
+          max-height: none;
+          img {
+            width: 100%;
+            height: auto;
+          }
+        }
+        &__details {
+          position: relative;
+          padding: 12px 0 0;
+          .cta {
+            position: relative;
+            right: auto;
+            bottom: auto;
+            margin-top: 8px;
+          }
+        }
+        &__remove {
+          position: relative;
+          right: auto;
+          top: auto;
+          margin-left: auto;
+        }
+      }
+    }
+    &__total {
+      padding: 16px;
+      .cta {
+        > button {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
