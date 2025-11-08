@@ -1,57 +1,25 @@
 const { updateUserValidation } = require("../middleware/validation");
-const db = require("../database/db");
-const md5 = require("md5");
+const User = require("../models/User");
+const bcrypt = require('bcryptjs');
 
 exports.updateUser = async (params) => {
   const { error } = updateUserValidation(params);
   if (error) throw { message: error.details[0].message, statusCode: 400 };
 
   const { userId, fullName, email, password } = params;
-  const hashedPassword = md5(password.toString());
+  const user = await User.findById(userId).lean();
+  if (!user) throw { message: "User not found", statusCode: 404 };
+  const match = await bcrypt.compare(password.toString(), user.password);
+  if (!match) throw { message: "Wrong credentials, please try again", statusCode: 400 };
 
-  return new Promise((resolve, reject) => {
-    db.query(
-      `SELECT * FROM users WHERE user_id = ? AND password = ?`,
-      [userId, hashedPassword],
-      (err, result) => {
-        if (err) reject({ message: err, statusCode: 500 });
+  if (email === user.email && fullName === user.fname) {
+    throw { message: "No new data has been provided", statusCode: 400 };
+  }
 
-        if (result.length === 0) {
-          reject({
-            message: "Wrong credentials, please try again",
-            statusCode: 400,
-          });
-        } else {
-          if (email === result[0].email && fullName === result[0].fname) {
-            reject({
-              message: "No new data has been provided",
-              statusCode: 400,
-            });
-          }
+  const update = {};
+  if (email && email !== user.email) update.email = email;
+  if (fullName && fullName !== user.fname) update.fname = fullName;
 
-          let query = "";
-
-          if (email !== result[0].email && fullName !== result[0].fname) {
-            query = `fname = '${fullName}', email = '${email}'`;
-          } else if (email !== result[0].email) {
-            query = `email = '${email}'`;
-          } else {
-            query = `fname = '${fullName}'`;
-          }
-
-          db.query(
-            `UPDATE users SET ${query} WHERE user_id = ?`,
-            [userId],
-            (err, result) => {
-              if (err) throw { message: err, statusCode: 500 };
-              resolve({
-                message: "User details have been successfully updated",
-                data: result,
-              });
-            }
-          );
-        }
-      }
-    );
-  });
+  const updated = await User.findByIdAndUpdate(userId, update, { new: true }).lean();
+  return { message: "User details have been successfully updated", data: updated };
 };

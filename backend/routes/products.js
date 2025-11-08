@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../database/db");
+const Product = require("../models/Product");
+const Category = require("../models/Category");
 
 // GET ALL PRODUCTS
 router.get("/", async (req, res) => {
@@ -17,29 +18,20 @@ router.get("/", async (req, res) => {
     endValue = 10;
   }
 
-  db.query(
-    `SELECT p.id, p.title, p.image, p.price, p.short_desc, p.quantity,
-        c.title as category FROM products p JOIN categories c ON
-            c.id = p.cat_id LIMIT ${startValue}, ${limit}`,
-    (err, results) => {
-      if (err) console.log(err);
-      else res.json(results);
-    }
-  );
+  const results = await Product.find()
+    .skip(startValue)
+    .limit(parseInt(limit))
+    .populate('cat_id', 'title')
+    .lean();
+  res.json(results.map(r => ({ ...r, category: r.cat_id?.title })));
 });
 
 // GET SINGLE PRODUCT BY ID
 router.get("/:productId", async (req, res) => {
   const { productId } = req.params;
-  db.query(
-    `SELECT p.id, p.title, p.image, p.images, p.description, p.price, p.quantity, p.short_desc,
-        c.title as category FROM products p JOIN categories c ON
-            c.id = p.cat_id WHERE p.id = ${productId}`,
-    (err, results) => {
-      if (err) console.log(err);
-      else res.json(results[0]);
-    }
-  );
+  const result = await Product.findById(productId).populate('cat_id', 'title').lean();
+  if (!result) return res.status(404).json({ message: 'Product not found' });
+  res.json({ ...result, category: result.cat_id?.title });
 });
 
 module.exports = router;

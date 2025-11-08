@@ -2,48 +2,24 @@ const {
   loginValidation,
   registerValidation,
 } = require("../middleware/validation");
-const db = require("../database/db");
+const User = require("../models/User");
 const jwt = require("jsonwebtoken");
-const md5 = require("md5");
+const bcrypt = require('bcryptjs');
 
 exports.loginUser = async (params) => {
   const { error } = loginValidation(params);
   if (error) throw { message: error.details[0].message, statusCode: 400 };
 
   const { email, password } = params;
-  const hashedPassword = md5(password.toString());
+  // Find user by email then compare password using bcrypt
+  const user = await User.findOne({ email }).lean();
+  if (!user) throw { message: "Wrong credentials, please try again", statusCode: 400 };
+  const match = await bcrypt.compare(password.toString(), user.password);
+  if (!match) throw { message: "Wrong credentials, please try again", statusCode: 400 };
+  if (!user) throw { message: "Wrong credentials, please try again", statusCode: 400 };
 
-  return new Promise((resolve, reject) => {
-    db.query(
-      "SELECT * FROM users WHERE email = ? AND password = ?",
-      [email, hashedPassword],
-      (err, result) => {
-        if (err) {
-          reject({
-            data: err,
-            message: "Something went wrong, please try again",
-            statusCode: 400,
-          });
-        }
-
-        if (result.length === 0) {
-          reject({
-            message: "Wrong credentials, please try again",
-            statusCode: 400,
-          });
-        }
-
-        if (result.length > 0) {
-          const token = jwt.sign({ data: result }, "secret");
-          resolve({
-            message: "Logged in successfully",
-            data: result,
-            token,
-          });
-        }
-      }
-    );
-  });
+  const token = jwt.sign({ data: user }, process.env.JWT_SECRET || "secret");
+  return { message: "Logged in successfully", data: user, token };
 };
 
 exports.registerUser = async (params) => {
@@ -51,42 +27,14 @@ exports.registerUser = async (params) => {
   if (error) throw { message: error.details[0].message, statusCode: 400 };
 
   const { fullName, email, password } = params;
-  const hashedPassword = md5(password.toString());
+  const hashedPassword = await bcrypt.hash(password.toString(), 10);
 
-  return new Promise((resolve, reject) => {
-    db.query(
-      `SELECT email FROM users WHERE email = ?`,
-      [email],
-      (err, result) => {
-        if (result.length > 0) {
-          reject({
-            message: "Email address is in use, please try a different one",
-            statusCode: 400,
-          });
-        } else if (result.length === 0) {
-          db.query(
-            `INSERT INTO users (fname, email, password) VALUES (?,?,?)`,
-            [fullName, email, hashedPassword],
-            (err, result) => {
-              if (err) {
-                reject({
-                  message: "Something went wrong, please try again",
-                  statusCode: 400,
-                  data: err,
-                });
-              } else {
-                const token = jwt.sign({ data: result }, "secret");
-                resolve({
-                  data: result,
-                  message: "You have successfully registered.",
-                  token: token,
-                  statusCode: 200,
-                });
-              }
-            }
-          );
-        }
-      }
-    );
-  });
+  // Check if user exists
+  const existing = await User.findOne({ email }).lean();
+  if (existing) throw { message: "Email address is in use, please try a different one", statusCode: 400 };
+
+  const newUser = new User({ fname: fullName, email, password: hashedPassword });
+  const saved = await newUser.save();
+  const token = jwt.sign({ data: saved }, process.env.JWT_SECRET || "secret");
+  return { data: saved, message: "You have successfully registered.", token, statusCode: 200 };
 };

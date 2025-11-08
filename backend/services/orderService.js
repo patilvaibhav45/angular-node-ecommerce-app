@@ -1,4 +1,5 @@
-const db = require("../database/db");
+const Order = require("../models/Order");
+const Product = require("../models/Product");
 
 exports.createOrder = async (params) => {
   const { userId, cart } = params;
@@ -6,64 +7,25 @@ exports.createOrder = async (params) => {
   if (!cart) throw { message: "cart was not provided", statusCode: 400 };
   if (!userId) throw { message: "userId was not provided", statusCode: 400 };
 
-  return new Promise((resolve, reject) => {
-    db.query(
-      `INSERT INTO orders (user_id) VALUES (?)`,
-      [userId],
-      (err, result) => {
-        if (err) reject({ message: err, statusCode: 500 });
+  // Create order document
+  const orderProducts = [];
+  for (const prod of cart.products) {
+    const dbProd = await Product.findById(prod.id).lean();
+    if (!dbProd) throw { message: `Product with id ${prod.id} not found`, statusCode: 400 };
 
-        if (result) {
-          let newOrderId = result.insertId;
-          cart.products.forEach(async (prod) => {
-            db.query(
-              `SELECT p.quantity FROM products p WHERE p.id = ?`,
-              [prod.id],
-              (err, result) => {
-                if (err) reject({ message: err, statusCode: 500 });
+    let productQuantity = dbProd.quantity;
+    let updatedQuantity = productQuantity - prod.quantity;
+    productQuantity = updatedQuantity > 0 ? updatedQuantity : 0;
 
-                let productQuantity = result[0].quantity; // db product
+    // update product quantity
+    await Product.findByIdAndUpdate(prod.id, { quantity: productQuantity });
 
-                // deduct the quantity from products that were ordered in db
-                let updatedQuantity = productQuantity - prod.quantity;
-                if (updatedQuantity > 0) {
-                  productQuantity = updatedQuantity;
-                } else productQuantity = 0;
+    orderProducts.push({ product_id: prod.id, quantity: prod.quantity });
+  }
 
-                db.query(
-                  `INSERT INTO orders_details (order_id, product_id, quantity) VALUES (?,?,?)`,
-                  [newOrderId, prod.id, prod.quantity],
-                  (err, result) => {
-                    if (err) reject({ message: err, statusCode: 500 });
-
-                    db.query(
-                      `UPDATE products SET quantity = ${productQuantity} WHERE id = ${prod.id}`,
-                      (err, result) => {
-                        if (err) reject({ message: err, statusCode: 500 });
-                        console.log(result);
-                      }
-                    );
-                  }
-                );
-              }
-            );
-          });
-
-          resolve({
-            message: `Order was successfully placed with order id ${newOrderId}`,
-            orderId: newOrderId,
-            products: cart.products,
-            statusCode: 201,
-          });
-        } else {
-          reject({
-            message: "New order failed while adding order details",
-            statusCode: 500,
-          });
-        }
-      }
-    );
-  });
+  const newOrder = new Order({ user_id: userId, products: orderProducts });
+  const saved = await newOrder.save();
+  return { message: `Order was successfully placed with order id ${saved._id}`, orderId: saved._id, products: cart.products, statusCode: 201 };
 };
 
 exports.getSingleOrder = async (params) => {
@@ -72,24 +34,9 @@ exports.getSingleOrder = async (params) => {
   if (!orderId) throw { message: "orderId was not provided", statusCode: 400 };
   if (!userId) throw { message: "userId was not provided", statusCode: 400 };
 
-  return new Promise((resolve, reject) => {
-    db.query(
-      `SELECT * FROM orders INNER JOIN orders_details ON ( orders.id = orders_details.order_id ) WHERE orders.id = ? AND orders.user_id = ?`,
-      [orderId, userId],
-      (err, result) => {
-        if (err) reject({ message: err, statusCode: 500 });
-
-        if (result.length === 0)
-          reject({ message: "order was not found", statusCode: 400 });
-
-        resolve({
-          statusCode: 200,
-          message: `Order was found`,
-          data: result,
-        });
-      }
-    );
-  });
+  const order = await Order.findOne({ _id: orderId, user_id: userId }).lean().populate('products.product_id');
+  if (!order) throw { message: "order was not found", statusCode: 400 };
+  return { statusCode: 200, message: `Order was found`, data: order };
 };
 
 exports.getOrders = async (params) => {
@@ -97,22 +44,7 @@ exports.getOrders = async (params) => {
 
   if (!userId) throw { message: "userId was not provided", statusCode: 400 };
 
-  return new Promise((resolve, reject) => {
-    db.query(
-      `SELECT * FROM orders INNER JOIN orders_details ON ( orders.id = orders_details.order_id ) WHERE user_id = ?`,
-      [userId],
-      (err, result) => {
-        if (err) reject({ message: err, statusCode: 500 });
-
-        if (result.length === 0)
-          reject({ message: "No order were found", statusCode: 400 });
-
-        resolve({
-          statusCode: 200,
-          message: `${result.length} orders were found`,
-          data: result,
-        });
-      }
-    );
-  });
+  const orders = await Order.find({ user_id: userId }).lean().populate('products.product_id');
+  if (!orders || orders.length === 0) throw { message: "No order were found", statusCode: 400 };
+  return { statusCode: 200, message: `${orders.length} orders were found`, data: orders };
 };

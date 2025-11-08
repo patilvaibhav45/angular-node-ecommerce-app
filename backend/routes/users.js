@@ -1,14 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../database/db");
+const User = require("../models/User");
 const userController = require("../controllers/userController");
 
 // Get all users
-router.get("/", (req, res) => {
-  db.query("SELECT * FROM users", (err, results) => {
-    if (err) console.log(err);
-    else res.json(results);
-  });
+router.get("/", async (req, res) => {
+  const users = await User.find().lean();
+  res.json(users);
 });
 
 router.put("/:userId", userController.update_user);
