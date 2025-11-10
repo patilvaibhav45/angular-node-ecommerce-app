@@ -11,8 +11,8 @@ export class AuthService {
   private userSubject: BehaviorSubject<any>;
   public user: Observable<any>;
 
-  constructor(private _api: ApiService, private _token: TokenStorageService) {
-    this.userSubject = new BehaviorSubject<any>(this._token.getUser());
+  constructor(private _api: ApiService, private token: TokenStorageService) {
+    this.userSubject = new BehaviorSubject<any>(this.token.getUser());
     this.user = this.userSubject.asObservable();
   }
 
@@ -34,8 +34,8 @@ export class AuthService {
             email: credentials.email,
             token: res.token,
           };
-          this._token.setToken(res.token);
-          this._token.setUser(res.data[0]);
+          this.token.setToken(res.token);
+          this.token.setUser(res.data[0]);
           console.log(res);
           this.userSubject.next(user);
           return user;
@@ -52,7 +52,7 @@ export class AuthService {
   }
 
   logout() {
-    this._token.clearStorage();
+    this.token.clearStorage();
     this.userSubject.next(null);
   }
 }

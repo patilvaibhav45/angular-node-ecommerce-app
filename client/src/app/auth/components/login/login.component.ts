@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { FormsModule } from '@angular/forms';
 
@@ -17,9 +17,17 @@ export class LoginComponent implements OnInit {
   error = '';
   loading = false;
 
-  constructor(private _auth: AuthService, private _router: Router) {}
+  private returnUrl: string | null = null;
 
-  ngOnInit(): void {}
+  constructor(
+    private _auth: AuthService,
+    private _router: Router,
+    private _route: ActivatedRoute
+  ) {}
+
+  ngOnInit(): void {
+    this.returnUrl = this._route.snapshot.queryParams['returnUrl'] || null;
+  }
 
   onSubmit(): void {
     this.loading = true;
@@ -32,7 +40,8 @@ export class LoginComponent implements OnInit {
         .subscribe(
           (res) => {
             this.loading = false;
-            this._router.navigate(['/']);
+            if (this.returnUrl) this._router.navigateByUrl(this.returnUrl);
+            else this._router.navigate(['/']);
           },
           (err) => {
             console.log(err);

@@ -47,12 +47,12 @@ export class ProfileComponent implements OnInit {
 
   constructor(
     private _api: ApiService,
-    private _token: TokenStorageService,
+    private token: TokenStorageService,
     private _router: Router
   ) {}
 
   ngOnInit(): void {
-    const { user_id, fname, email } = this._token.getUser();
+    const { user_id, fname, email } = this.token.getUser();
     this.userId = user_id;
     this.user[0].value = fname;
     this.user[1].value = email;
@@ -86,8 +86,8 @@ export class ProfileComponent implements OnInit {
             this.alertType = 'success';
             this.alertVisible = true;
             this.loading = false;
-            const oldDetails = this._token.getUser();
-            this._token.setUser({
+            const oldDetails = this.token.getUser();
+            this.token.setUser({
               ...oldDetails,
               fname: this.user[0].value,
               email: this.user[1].value,

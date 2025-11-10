@@ -9,18 +9,19 @@ import { ProductComponent } from './product/product.component';
 import { ProfileComponent } from './profile/profile.component';
 import { RegisterComponent } from './auth/components/register/register.component';
 import { AuthGuardService } from './guards/auth-guard.service';
+import { RedirectIfAuthenticatedGuard } from './guards/redirect-if-authenticated.guard';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
+  { path: 'login', component: LoginComponent, canActivate: [RedirectIfAuthenticatedGuard] },
+  { path: 'register', component: RegisterComponent, canActivate: [RedirectIfAuthenticatedGuard] },
   {
     path: 'profile',
     component: ProfileComponent,
     canActivate: [AuthGuardService]
   },
   { path: 'product/:id', component: ProductComponent },
-  { path: 'cart', component: CartComponent },
+  { path: 'cart', component: CartComponent, canActivate: [AuthGuardService] },
   {
     path: 'checkout',
     component: CheckoutComponent,

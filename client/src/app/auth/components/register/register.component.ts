@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { ApiService } from '../../../services/api.service';
 
@@ -19,13 +19,17 @@ export class RegisterComponent implements OnInit {
   confirmPassword = '';
   errorMessage = '';
   loading = false;
+  private returnUrl: string | null = null;
   constructor(
     private _api: ApiService,
     private _auth: AuthService,
-    private _router: Router
+    private _router: Router,
+    private _route: ActivatedRoute
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.returnUrl = this._route.snapshot.queryParams['returnUrl'] || null;
+  }
 
   onSubmit(): void {
     this.errorMessage = '';
@@ -42,9 +46,10 @@ export class RegisterComponent implements OnInit {
           })
           .subscribe(
             (res) => {
-              console.log(res);
               this.loading = false;
-              this._router.navigate(['/login']);
+              const queryParams: any = {};
+              if (this.returnUrl) queryParams.returnUrl = this.returnUrl;
+              this._router.navigate(['/login'], { queryParams });
             },
             (err) => {
               this.errorMessage = err.error.message;

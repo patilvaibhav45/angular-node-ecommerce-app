@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { HeaderComponent } from './header/header.component';
+import { TokenStorageService } from './services/token-storage.service';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +11,17 @@ import { HeaderComponent } from './header/header.component';
   standalone: true,
   imports: [RouterModule, HeaderComponent],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'client';
+
+  constructor(private router: Router, private token: TokenStorageService) {}
+
+  ngOnInit(): void {
+    const user = this.token.getUser();
+    if (user) {
+      this.router.navigate(['/']);
+    } else {
+      this.router.navigate(['/login']);
+    }
+  }
 }

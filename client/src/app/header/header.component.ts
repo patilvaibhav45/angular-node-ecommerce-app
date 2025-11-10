@@ -34,7 +34,7 @@ export class HeaderComponent implements OnInit {
   }
 
   constructor(
-    private _token: TokenStorageService,
+    private token: TokenStorageService,
     private _auth: AuthService,
     private _cart: CartService
   ) {
@@ -49,7 +49,7 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this._token.getUser()) this.isLoggedIn = true;
+    if (this.token.getUser()) this.isLoggedIn = true;
     else this.isLoggedIn = false;
   }
 
