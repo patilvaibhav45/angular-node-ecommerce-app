@@ -1,7 +1,8 @@
 <div class="order-history-container">
   <h2>Order History</h2>
   {{ error }}
-  <nz-table #basicTable [nzData]="orders" *ngIf="orders.length > 0">
+  @if (orders.length > 0) {
+    <nz-table #basicTable [nzData]="orders">
     <thead>
       <tr>
         <th>Name</th>
@@ -16,5 +17,6 @@
         <td>{{ item.order_id }}</td>
       </tr>
     </tbody>
-  </nz-table>
+    </nz-table>
+  }
 </div>

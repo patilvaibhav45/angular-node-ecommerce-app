@@ -7,7 +7,7 @@
     ></nz-progress>
   </div>
 
-  <div *ngIf="currentStep === 1">
+  @if (currentStep === 1) {
     <div class="billing-container">
       <h2>Billing Address</h2>
       <form>
@@ -34,8 +34,8 @@
         Continue
       </button>
     </div>
-  </div>
-  <div *ngIf="currentStep === 2">
+  }
+  @if (currentStep === 2) {
     <div class="payment-container">
       <h2>Payment Details</h2>
       <form>
@@ -92,8 +92,8 @@
         Continue
       </button>
     </div>
-  </div>
-  <div *ngIf="currentStep === 3">
+  }
+  @if (currentStep === 3) {
     <div class="summary-container">
       <div class="summary-container__order">
         <h2>Order Summary</h2>
@@ -131,8 +131,8 @@
         </div>
       </div>
     </div>
-  </div>
-  <div *ngIf="currentStep === 4">
+  }
+  @if (currentStep === 4) {
     <div class="confirmation-container">
       <header>
         <div class="title">
@@ -164,5 +164,5 @@
         </div>
       </div>
     </div>
-  </div>
+  }
 </div>

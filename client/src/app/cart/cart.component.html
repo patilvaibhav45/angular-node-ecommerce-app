@@ -1,8 +1,11 @@
 <div class="cart-container">
-  <div class="cart-container__empty" *ngIf="cartData.products.length === 0">
-    Your cart is empty.
-  </div>
-  <div class="cart-container__list" *ngIf="cartData.products.length > 0">
+  @if (cartData.products.length === 0) {
+    <div class="cart-container__empty">
+      Your cart is empty.
+    </div>
+  }
+  @if (cartData.products.length > 0) {
+    <div class="cart-container__list">
     <header class="list-header">
       <h2>Cart</h2>
     </header>
@@ -31,7 +34,8 @@
         </div>
       </div>
     </div>
-  </div>
+    </div>
+  }
   <div class="cart-container__total">
     <div class="price">
       <span>

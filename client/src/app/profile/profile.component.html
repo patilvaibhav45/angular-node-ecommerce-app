@@ -1,13 +1,14 @@
 <div class="profile-container">
   <div class="form-container">
     <h2>Profile</h2>
-    <nz-alert
-      [nzType]="alertType"
-      nzShowIcon
-      [nzMessage]="alertMessage"
-      [ngStyle]="{ marginBottom: '12px' }"
-      *ngIf="alertVisible"
-    ></nz-alert>
+    @if (alertVisible) {
+      <nz-alert
+        [nzType]="alertType"
+        nzShowIcon
+        [nzMessage]="alertMessage"
+        [ngStyle]="{ marginBottom: '12px' }"
+      ></nz-alert>
+    }
     <form (ngSubmit)="onSubmit()">
       <div class="input-container" *ngFor="let field of user">
         <label for="field.key">{{ field.label }}</label>

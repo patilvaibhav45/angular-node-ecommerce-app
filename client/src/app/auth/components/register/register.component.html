@@ -1,13 +1,14 @@
 <div class="register-container">
   <div class="form-container">
     <h2>Sign Up to Eccom</h2>
-    <nz-alert
-      *ngIf="errorMessage"
-      nzShowIcon
-      nzType="error"
-      [nzMessage]="errorMessage"
-      [ngStyle]="{ 'margin-bottom': '16px' }"
-    ></nz-alert>
+    @if (errorMessage) {
+      <nz-alert
+        nzShowIcon
+        nzType="error"
+        [nzMessage]="errorMessage"
+        [ngStyle]="{ 'margin-bottom': '16px' }"
+      ></nz-alert>
+    }
     <form #registerForm="ngForm" (ngSubmit)="onSubmit()">
       <div class="input-container">
         <label for="fullName">Full name</label>
