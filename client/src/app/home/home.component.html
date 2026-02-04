@@ -4,17 +4,6 @@
       <h2>Categories</h2>
     </div>
     <div class="categories__list">
-      <!-- <swiper
-        [zoom]="false"
-        [slidesPerView]="screenWidth > 1200 ? 3 : 1"
-        [spaceBetween]="50"
-        [pagination]="true"
-        [loop]="true"
-      >
-        <ng-template swiperSlide *ngFor="let c of categories">
-          <div class="category-card">{{ c.name }}</div>
-        </ng-template>
-      </swiper> -->
     </div>
   </div>
   <div class="products">
@@ -35,18 +24,19 @@
     }
     @if (!loading) {
       <div class="products__list">
-      <app-product-card
-        *ngFor="let n of products"
-        [id]="n.id"
-        [title]="n.title"
-        [image]="n.image"
-        [price]="n.price"
-        [short_desc]="n.short_desc"
-        [category]="n.category"
-        [quantity]="n.quantity"
-        [onAdd]="cartService.addProduct.bind(cartService)"
-      >
-      </app-product-card>
+      @for (let product of this.products) {
+        <app-product-card
+          [id]="product.id"
+          [title]="product.title"
+          [image]="product.image"
+          [price]="product.price"
+          [short_desc]="product.short_desc"
+          [category]="product.category"
+          [quantity]="product.quantity"
+          [onAdd]="cartService.addProduct.bind(cartService)"
+        >
+        </app-product-card>
+      }
       </div>
     }
   </div>
