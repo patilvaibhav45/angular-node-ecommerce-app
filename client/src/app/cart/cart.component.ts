@@ -29,4 +29,8 @@ export class CartComponent implements OnInit {
   removeCartItem(id: number): void {
     this._cart.removeProduct(id);
   }
+
+  trackByProduct(index: number, product: any): number | string {
+    return product?.id ?? index;
+  }
 }

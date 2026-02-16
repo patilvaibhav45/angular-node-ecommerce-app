@@ -1,18 +1,16 @@
 <div class="cart-container">
-  @if (cartData.products.length === 0) {
-    <div class="cart-container__empty">
-      Your cart is empty.
-    </div>
-  }
-  @if (cartData.products.length > 0) {
-    <div class="cart-container__list">
-    <header class="list-header">
+  <div *ngIf="!(cartData?.products?.length)" class="cart-container__empty">
+    Your cart is empty.
+  </div>
+
+  <div class="cart-container__list">
+    <header class="list-header" *ngIf="cartData?.products?.length">
       <h2>Cart</h2>
     </header>
     <div
       class="list-item"
-      *ngFor="let product of cartData.products; index as i"
-      [ngStyle]="{ border: i === cartData.products.length - 1 && 'none' }"
+      *ngFor="let product of cartData?.products || []; let i = index; trackBy: trackByProduct"
+      [ngStyle]="{ border: i === (cartData?.products?.length - 1) ? 'none' : null }"
     >
       <div class="list-item__remove" (click)="removeCartItem(product.id)">
         X
@@ -34,8 +32,7 @@
         </div>
       </div>
     </div>
-    </div>
-  }
+  </div>
   <div class="cart-container__total">
     <div class="price">
       <span>
