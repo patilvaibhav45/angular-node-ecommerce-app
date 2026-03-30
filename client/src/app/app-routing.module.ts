@@ -11,10 +11,10 @@ import { RegisterComponent } from './auth/components/register/register.component
 import { AuthGuardService } from './guards/auth-guard.service';
 import { RedirectIfAuthenticatedGuard } from './guards/redirect-if-authenticated.guard';
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent, canActivate: [RedirectIfAuthenticatedGuard] },
-  { path: 'register', component: RegisterComponent, canActivate: [RedirectIfAuthenticatedGuard] },
+  { path: 'register', component: RegisterComponent },
   {
     path: 'profile',
     component: ProfileComponent,
