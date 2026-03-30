@@ -1,58 +1,82 @@
-import { Component, OnInit } from '@angular/core';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { Router, ActivatedRoute } from '@angular/router';
+import {
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  signal,
+  inject,
+  DestroyRef,
+} from '@angular/core';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
-import { FormsModule } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
-  // standalone: true,
-  imports: [NzButtonModule, FormsModule],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent implements OnInit {
-  email = '';
-  password = '';
-  error = '';
-  loading = false;
+  private fb = inject(FormBuilder);
+  private _auth = inject(AuthService);
+  private _router = inject(Router);
+  private _route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
 
-  private returnUrl: string | null = null;
+  loginForm: FormGroup;
+  loading = signal(false);
+  error = signal<string | null>(null);
+  passwordVisible = signal(false);
 
-  constructor(
-    private _auth: AuthService,
-    private _router: Router,
-    private _route: ActivatedRoute
-  ) {}
+  private returnUrl = signal<string | null>(null);
+
+  constructor() {
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+    });
+  }
 
   ngOnInit(): void {
-    this.returnUrl = this._route.snapshot.queryParams['returnUrl'] || null;
+    this.returnUrl.set(this._route.snapshot.queryParams['returnUrl'] || null);
   }
 
   onSubmit(): void {
-    this.loading = true;
-    this.error = '';
-    if (!this.email || !this.password) {
-      this.error = 'Make sure to fill everything ;)';
-    } else {
-      this._auth
-        .login({ email: this.email, password: this.password })
-        .subscribe(
-          (res) => {
-            this.loading = false;
-            if (this.returnUrl) this._router.navigateByUrl(this.returnUrl);
-            else this._router.navigate(['/']);
-          },
-          (err) => {
-            console.log(err);
-            this.error = err.error.message;
-            this.loading = false;
-          }
-        );
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
     }
+
+    this.loading.set(true);
+    this.error.set(null);
+
+    this._auth
+      .login(this.loginForm.value)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.loading.set(false);
+          const url = this.returnUrl() || '/';
+          this._router.navigateByUrl(url);
+        },
+        error: (err) => {
+          this.error.set(err.error?.message || 'Authentication failed');
+          this.loading.set(false);
+        },
+      });
   }
 
-  canSubmit(): boolean {
-    return this.email.length > 0 && this.password.length > 0;
+  togglePasswordVisibility(): void {
+    this.passwordVisible.update((v) => !v);
   }
 }
+
